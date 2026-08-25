@@ -1,6 +1,8 @@
 # AI Code Reviewer
 
-A full-stack **MERN + Gemini AI** application that lets a logged-in user paste code, select a programming language, and receive an intelligent, structured code review.
+A full-stack **MERN + Gemini AI** application that analyzes source code, identifies bugs and potential issues, evaluates time and space complexity, and provides structured improvement suggestions.
+
+Users can register or sign in with Google, submit code for AI analysis, and maintain a history of their previous code reviews.
 
 ```text
 React (Frontend)
@@ -55,7 +57,7 @@ AI-Code-Reviewer/
 │   │   ├── pages/
 │   │   ├── services/
 │   │   └── ...
-│   ├── .env
+│   ├── .env.example
 │   ├── package.json
 │   └── ...
 │
@@ -67,10 +69,11 @@ AI-Code-Reviewer/
 │   ├── routes/
 │   ├── services/
 │   ├── utils/
-│   ├── .env
+│   ├── .env.example
 │   ├── server.js
 │   └── package.json
 │
+├── LICENSE
 └── README.md
 ```
 
@@ -212,7 +215,7 @@ npm run dev
 Expected output includes:
 
 ```text
-Gemini API key loaded: XXXXXXXX...
+Gemini API key loaded: XXXXXXXX... (first 8 characters shown for verification)
 Server running on http://localhost:5000
 MongoDB connected: 127.0.0.1
 ```
@@ -350,8 +353,14 @@ Output is generated in `frontend/dist/`. For deployment, set environment variabl
 ## Author
 
 **Arnav Mishra**
-Indian Institute of Technology Bhilai
+IIT Bhilai
 
 ---
 
-Built with React, Node.js, Express, MongoDB, and Google Gemini AI.
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+Built with **React, Node.js, Express.js, MongoDB, and Google Gemini AI**.
