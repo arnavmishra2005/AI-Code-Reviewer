@@ -1,18 +1,6 @@
 # AI Code Reviewer
 
-A full-stack **MERN + Gemini AI** application that lets a logged-in user paste code, select a programming language, and receive an intelligent code review.
-
-The application analyzes code for:
-
-- Overall code quality score
-- Bugs and correctness issues
-- Code-quality and design issues
-- Practical suggestions
-- Time complexity
-- Space complexity
-- Detailed explanation
-
-All AI requests are handled by the backend, so the Gemini API key is never exposed to the browser.
+A full-stack **MERN + Gemini AI** application that lets a logged-in user paste code, select a programming language, and receive an intelligent, structured code review.
 
 ```text
 React (Frontend)
@@ -24,70 +12,39 @@ Google Gemini API
 MongoDB
 ```
 
-> **Built by Arnav Mishra — IIT Bhilai**
+All AI requests are handled by the backend, so the Gemini API key is never exposed to the browser.
 
 ---
 
-## 1. Features
+## Features
 
-- User registration and login
-- JWT-based authentication
-- Secure protected review APIs
+- Email/password registration and login (JWT-based)
+- Google Sign-In (OAuth 2.0) as an alternative login method
+- Secure, protected review APIs
 - AI-powered code analysis using Google Gemini
-- Support for multiple programming languages:
-  - C++
-  - Python
-  - JavaScript
-  - Java
-  - C
-  - Go
-  - TypeScript
-- AI-generated score from 0–100
-- Bug detection
-- Code-quality issue detection
-- Improvement suggestions
+- Support for multiple languages: C++, Python, JavaScript, Java, C, Go, TypeScript
+- AI-generated score (0–100), bug detection, issue detection, and improvement suggestions
 - Time and space complexity analysis
-- Review history
-- Delete previous reviews
+- Review history with delete support
 - Dashboard statistics
-- Responsive and modern frontend
+- Responsive, modern frontend
 - MongoDB persistence
-- Backend-only AI API communication
+- Backend-only AI API communication (key never touches the client)
 
 ---
 
-## 2. Technology Stack
+## Technology Stack
 
-### Frontend
-
-- React
-- Vite
-- JavaScript
-- CSS
-- Axios
-
-### Backend
-
-- Node.js
-- Express.js
-- JWT
-- bcryptjs
-- Mongoose
-- CORS
-- dotenv
-
-### Database
-
-- MongoDB
-
-### AI
-
-- Google Gemini API
-- `@google/generative-ai`
+| Layer | Stack |
+|---|---|
+| Frontend | React, Vite, JavaScript, CSS, Axios, `@react-oauth/google` |
+| Backend | Node.js, Express.js, JWT, bcryptjs, Mongoose, CORS, dotenv, `google-auth-library` |
+| Database | MongoDB |
+| AI | Google Gemini API (`@google/genai`) |
 
 ---
 
-## 3. Project Structure
+## Project Structure
 
 ```text
 AI-Code-Reviewer/
@@ -119,233 +76,140 @@ AI-Code-Reviewer/
 
 ---
 
-## 4. Prerequisites
+## Prerequisites
 
-Install the following before running the project:
+- **Node.js 18+** and **npm**
+- **MongoDB** (Community Server, local, or MongoDB Atlas)
+- A **Google Gemini API key**
+- A **Google OAuth Client ID** (for Google Sign-In)
 
-- **Node.js 18+**
-- **npm**
-- **MongoDB Community Server** or MongoDB Atlas
-- **Google Gemini API key**
-
-Check Node.js and npm:
+Verify Node/npm:
 
 ```bash
 node -v
 npm -v
 ```
 
-Check MongoDB on Windows:
-
-```powershell
-mongod --version
-```
-
-You can also verify that the MongoDB Windows service is running:
-
-```powershell
-Get-Service MongoDB
-```
-
 ---
 
-## 5. Install Dependencies
-
-Open a terminal in the project directory.
-
-### Backend
+## Installation
 
 ```bash
+# Backend
 cd AI-Code-Reviewer/backend
 npm install
-```
 
-### Frontend
-
-Open another terminal:
-
-```bash
+# Frontend (in a separate terminal)
 cd AI-Code-Reviewer/frontend
 npm install
 ```
 
 ---
 
-## 6. Set Up MongoDB
+## Database Setup (MongoDB)
 
-### Option A — Local MongoDB
-
-For local development, MongoDB can run on:
-
-```text
-mongodb://127.0.0.1:27017
-```
-
-The project uses:
+The project connects to:
 
 ```text
 mongodb://127.0.0.1:27017/ai-code-reviewer
 ```
 
-The `ai-code-reviewer` database will be created automatically when data is first stored.
-
-If MongoDB was installed as a Windows service, it can normally run automatically in the background.
-
-You can verify it with:
+The database is created automatically on first write. If running MongoDB locally as a service, confirm it's active:
 
 ```powershell
 Get-Service MongoDB
 ```
 
-Expected result:
+You can inspect the data visually with **MongoDB Compass**, connecting to `mongodb://127.0.0.1:27017`.
 
-```text
-Status   Name      DisplayName
-------   ----      -----------
-Running  MongoDB   MongoDB Server (MongoDB)
-```
-
-### MongoDB Compass
-
-MongoDB Compass is a graphical interface for viewing and managing your MongoDB databases.
-
-Connect Compass to:
-
-```text
-mongodb://127.0.0.1:27017
-```
-
-After registering a user or submitting reviews, the database and collections will appear in Compass.
+If using **MongoDB Atlas** instead, just replace `MONGO_URI` in `backend/.env` with your Atlas connection string.
 
 ---
 
-## 7. Get a Google Gemini API Key
+## Getting a Gemini API Key
 
-This project uses the **Google Gemini API** for code analysis.
-
-Create an API key through Google's Gemini/AI developer platform.
-
-After creating the key, copy it and place it in the backend `.env` file.
-
-> Keep the API key private. Never put it in frontend code or commit it to GitHub.
-
-The application expects the environment variable:
-
-```text
-AI_API_KEY=YOUR_GEMINI_API_KEY
-```
-
-The backend sends code to Gemini and returns only the structured review result to the frontend.
+Create a key via Google's Gemini/AI developer platform, then place it in `backend/.env` as `AI_API_KEY`. Keep this key private — never commit it or use it in frontend code.
 
 ---
 
-## 8. Configure Backend Environment Variables
+## Setting Up Google Sign-In
 
-Create:
+Google Sign-In is optional but enabled by default. To get it working:
 
-```text
-backend/.env
-```
+1. Go to [Google Cloud Console](https://console.cloud.google.com/).
+2. Create or select a project.
+3. Go to **APIs & Services → OAuth consent screen** and configure it (External type, app name, support email).
+4. Go to **APIs & Services → Credentials → Create Credentials → OAuth Client ID**.
+5. Choose **Web application** as the type.
+6. Under **Authorized JavaScript origins**, add:
+   - `http://localhost:5173` (dev)
+   - your production frontend URL, once deployed
+7. Save and copy the generated **Client ID** — you do not need the client secret for this flow.
+8. Add the Client ID to **both**:
+   - `backend/.env` as `GOOGLE_CLIENT_ID`
+   - `frontend/.env` as `VITE_GOOGLE_CLIENT_ID`
+9. Restart both servers after editing `.env` files.
 
-Example:
+---
+
+## Environment Variables
+
+### `backend/.env`
 
 ```env
 MONGO_URI=mongodb://127.0.0.1:27017/ai-code-reviewer
-
 JWT_SECRET=replace-this-with-a-long-random-secret
-
-AI_API_KEY=YOUR_GEMINI_API_KEY
-
+AI_API_KEY=your_gemini_api_key
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
 PORT=5000
-
 CLIENT_URL=http://localhost:5173
 ```
-
-### Explanation
 
 | Variable | Purpose |
 |---|---|
 | `MONGO_URI` | MongoDB connection string |
 | `JWT_SECRET` | Secret used to sign authentication tokens |
 | `AI_API_KEY` | Google Gemini API key |
+| `GOOGLE_CLIENT_ID` | OAuth Client ID used to verify Google Sign-In tokens |
 | `PORT` | Backend server port |
-| `CLIENT_URL` | Frontend URL used for CORS |
+| `CLIENT_URL` | Frontend URL, used for CORS |
 
-### Important
-
-Do not write:
-
-```env
-AI_API_KEY=YOUR_GEMINI_API_KEY
-```
-
-literally.
-
-Replace it with your actual key:
-
-```env
-AI_API_KEY=your_actual_gemini_key_here
-```
-
-Also avoid unnecessary spaces around `=`.
-
----
-
-## 9. Configure Frontend Environment Variables
-
-Create:
-
-```text
-frontend/.env
-```
-
-Use:
+### `frontend/.env`
 
 ```env
 VITE_API_URL=http://localhost:5000/api
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
 
-The frontend uses this URL to communicate with the Express backend.
+### Important
+
+- Do not commit real `.env` files. Ensure `.gitignore` includes:
+  ```text
+  .env
+  .env.*
+  ```
+- If you keep an `.env.example`, use placeholders only:
+  ```env
+  MONGO_URI=your_mongodb_connection_string
+  JWT_SECRET=your_jwt_secret
+  AI_API_KEY=your_gemini_api_key
+  GOOGLE_CLIENT_ID=your_google_oauth_client_id
+  PORT=5000
+  CLIENT_URL=http://localhost:5173
+  ```
 
 ---
 
-## 10. Never Commit `.env` Files
+## Running the App
 
-Your `.env` files contain secrets.
-
-Do not upload them to GitHub.
-
-Make sure `.gitignore` contains:
-
-```text
-.env
-.env.*
-```
-
-If your project uses `.env.example`, it should contain placeholders rather than real keys.
-
-Example:
-
-```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-AI_API_KEY=your_gemini_api_key
-PORT=5000
-CLIENT_URL=http://localhost:5173
-```
-
----
-
-## 11. Run the Backend
-
-Open a terminal:
+**Backend:**
 
 ```bash
 cd AI-Code-Reviewer/backend
 npm run dev
 ```
 
-Expected output:
+Expected output includes:
 
 ```text
 Gemini API key loaded: XXXXXXXX...
@@ -353,153 +217,64 @@ Server running on http://localhost:5000
 MongoDB connected: 127.0.0.1
 ```
 
-The exact MongoDB message may vary.
-
-You can test the backend by opening:
-
-```text
-http://localhost:5000
-```
-
-You should receive:
+Verify at `http://localhost:5000` — you should see:
 
 ```json
-{
-  "status": "ok",
-  "message": "AI Code Reviewer API is running"
-}
+{ "status": "ok", "message": "AI Code Reviewer API is running" }
 ```
 
----
-
-## 12. Run the Frontend
-
-Open a second terminal:
+**Frontend:**
 
 ```bash
 cd AI-Code-Reviewer/frontend
 npm run dev
 ```
 
-Vite will normally show:
+Open `http://localhost:5173`.
+
+---
+
+## How to Use
+
+1. **Register or Sign In** — create an account with email/password, or use the **Sign in with Google** button.
+2. **Open the Dashboard** and select a programming language.
+3. **Paste your code** into the editor.
+4. Click **Analyze Code**.
+5. View the AI-generated **score, summary, bugs, issues, suggestions, and time/space complexity**.
+6. Revisit or delete past analyses from **Review History**.
+
+Request flow:
 
 ```text
-Local: http://localhost:5173/
-```
-
-Open:
-
-```text
-http://localhost:5173
+Frontend → Express API → Authentication → Gemini AI → Structured JSON review → MongoDB → Frontend
 ```
 
 ---
 
-## 13. How to Use the Application
+## AI Review Scoring
 
-### Step 1 — Register
+The AI is instructed to avoid inventing problems and to distinguish real defects from optional style preferences.
 
-Create an account using:
+| Score | Meaning |
+|---|---|
+| 100 | Correct, reliable, efficient, no meaningful problems |
+| 90–99 | Correct, only minor non-critical improvements |
+| 75–89 | Correct but has a meaningful inefficiency or design limitation |
+| 60–74 | Real problem exists, but code is still mostly functional |
+| 30–59 | Significant correctness, runtime, memory, or algorithmic problems |
+| 0–29 | Fundamentally broken or unsafe |
 
-- Name
-- Email
-- Password
-
-### Step 2 — Login
-
-Log into the application.
-
-### Step 3 — Open Dashboard
-
-Select a programming language.
-
-### Step 4 — Enter Code
-
-Paste your code into the editor.
-
-### Step 5 — Analyze
-
-Click:
-
-```text
-Analyze Code
-```
-
-The request follows this flow:
-
-```text
-Frontend
-   ↓
-Express API
-   ↓
-Authentication
-   ↓
-Gemini AI
-   ↓
-Structured JSON review
-   ↓
-MongoDB
-   ↓
-Frontend
-```
-
-### Step 6 — View Results
-
-The application displays:
-
-- Score
-- Summary
-- Bugs
-- Issues
-- Suggestions
-- Time complexity
-- Space complexity
-- Explanation
-
-### Step 7 — History
-
-Previously generated reviews can be viewed from the History section and deleted when required.
+A fully correct program can and should receive **100/100**.
 
 ---
 
-## 14. AI Review Scoring
+## API Reference
 
-The AI is instructed to avoid inventing problems and to distinguish between actual defects and optional style preferences.
-
-### 100/100
-
-The code is correct, reliable, reasonably efficient, and has no meaningful problems.
-
-### 90–99
-
-The code is correct but has minor improvements that do not affect correctness.
-
-### 75–89
-
-The code works but has meaningful inefficiencies, design problems, or important edge-case limitations.
-
-### 60–74
-
-The code has real problems but is still mostly functional.
-
-### 30–59
-
-The code contains significant correctness, runtime, memory, or algorithmic problems.
-
-### 0–29
-
-The code is fundamentally broken or unsafe.
-
-A correct program is explicitly allowed to receive **100/100**.
-
----
-
-## 15. API Reference
-
-| Method | Route | Authentication | Description |
+| Method | Route | Auth required | Description |
 |---|---|:---:|---|
 | POST | `/api/auth/register` | No | Create an account |
 | POST | `/api/auth/login` | No | Login and receive JWT |
+| POST | `/api/auth/google` | No | Login/register via Google ID token |
 | GET | `/api/auth/me` | Yes | Get current user |
 | POST | `/api/reviews` | Yes | Analyze submitted code |
 | GET | `/api/reviews` | Yes | Get user's review history |
@@ -514,167 +289,52 @@ Authorization: Bearer <token>
 
 ---
 
-## 16. Troubleshooting
+## Troubleshooting
 
-### MongoDB connection error
+**MongoDB connection error** — confirm MongoDB is running (`Get-Service MongoDB` on Windows) and `MONGO_URI` is correct.
 
-Check that MongoDB is running:
+**"Gemini API key loaded: NO KEY"** — check `AI_API_KEY` in `backend/.env`, then restart the backend.
 
-```powershell
-Get-Service MongoDB
-```
+**"API key not valid"** — recheck the key for typos, stray quotes, or spaces, and restart the backend.
 
-If it is stopped, start the MongoDB service.
+**Gemini quota exceeded (`429 RESOURCE_EXHAUSTED`)** — you've hit the Gemini free-tier or project quota; wait for reset or use a project with available quota.
 
-Also verify:
+**CORS error** — confirm `CLIENT_URL` in `backend/.env` matches the actual frontend URL/port.
 
-```env
-MONGO_URI=mongodb://127.0.0.1:27017/ai-code-reviewer
-```
+**401 Unauthorized** — your JWT expired or local storage was cleared; log in again.
 
----
+**Google Sign-In fails / invalid token** — confirm `GOOGLE_CLIENT_ID` matches in both `.env` files, that your frontend's origin is listed under Authorized JavaScript origins in Google Cloud Console, and restart both servers after any `.env` change.
 
-### Gemini API key is not loaded
-
-If the backend prints:
-
-```text
-Gemini API key loaded: NO KEY
-```
-
-check:
-
-```text
-backend/.env
-```
-
-Make sure it contains:
-
-```env
-AI_API_KEY=your_actual_gemini_key
-```
-
-Then stop and restart the backend:
-
-```bash
-npm run dev
-```
-
-Environment variables are loaded when the Node.js process starts.
+**Frontend can't reach backend** — check `VITE_API_URL` and confirm the backend is running.
 
 ---
 
-### Gemini API key is invalid
-
-If you see:
-
-```text
-API key not valid
-```
-
-check that:
-
-1. The key is copied correctly.
-2. The key is in `backend/.env`.
-3. The variable name is exactly `AI_API_KEY`.
-4. There are no accidental quotes or spaces.
-5. The backend was restarted after changing `.env`.
-
----
-
-### Gemini quota exceeded
-
-The Gemini API has usage limits depending on the model and account/project quota.
-
-A free-tier project may have a limited number of requests.
-
-If the backend returns:
-
-```text
-429 RESOURCE_EXHAUSTED
-```
-
-the request quota has been reached.
-
-Wait until the quota resets or use an account/project with available quota.
-
----
-
-### CORS error
-
-Check:
-
-```env
-CLIENT_URL=http://localhost:5173
-```
-
-and make sure the frontend is actually running on that URL.
-
-If Vite uses another port, update `CLIENT_URL` accordingly.
-
----
-
-### 401 Unauthorized
-
-Log in again.
-
-The JWT may have expired or local browser storage may have been cleared.
-
----
-
-### Frontend cannot connect to backend
-
-Check:
-
-```env
-VITE_API_URL=http://localhost:5000/api
-```
-
-Then make sure the backend is running:
-
-```bash
-npm run dev
-```
-
----
-
-## 17. Production Build
-
-Build the frontend:
+## Production Build
 
 ```bash
 cd AI-Code-Reviewer/frontend
 npm run build
 ```
 
-The production files will be generated in:
-
-```text
-frontend/dist/
-```
-
-For production deployment, configure the same environment variables in the hosting provider rather than committing `.env` files.
+Output is generated in `frontend/dist/`. For deployment, set environment variables through your hosting provider rather than committing `.env` files.
 
 ---
 
-## 18. Security Notes
+## Security Notes
 
 - Never expose `AI_API_KEY` to the frontend.
 - Never commit real `.env` files.
-- Use a strong `JWT_SECRET`.
+- Use a strong, random `JWT_SECRET`.
 - Restrict MongoDB network access in production.
 - Use HTTPS in production.
-- Do not expose database credentials in client-side code.
-- Use environment variables for secrets.
+- Keep database credentials out of client-side code.
 
 ---
 
-## 19. Future Improvements
-
-Possible future enhancements include:
+## Future Improvements
 
 - Code syntax highlighting improvements
-- More AI providers
+- Additional AI providers
 - Streaming AI responses
 - More programming languages
 - Code diff visualization
@@ -683,32 +343,15 @@ Possible future enhancements include:
 - Advanced analytics
 - Automated test-case generation
 - GitHub repository integration
-- Deployment with CI/CD
+- CI/CD deployment
 
 ---
 
-## 20. Author
+## Author
 
-### Arnav Mishra
-
-**Indian Institute of Technology Bhilai (IIT Bhilai)**
-
-Full-stack AI-powered software project focused on combining:
-
-- Software development
-- Data persistence
-- Authentication
-- AI-assisted code analysis
-- Modern frontend development
+**Arnav Mishra**
+Indian Institute of Technology Bhilai
 
 ---
 
-## 21. Project Summary
-
-**AI Code Reviewer** is a full-stack software engineering project that demonstrates how a modern web application can combine a React frontend, Node.js/Express backend, MongoDB database, JWT authentication, and Google Gemini AI.
-
-The architecture keeps the AI API key on the server while providing users with an interactive platform for analyzing and improving their code.
-
-**Built with React + Node.js + Express + MongoDB + Google Gemini AI.**
-
-**Made by Arnav Mishra — IIT Bhilai.**
+Built with React, Node.js, Express, MongoDB, and Google Gemini AI.

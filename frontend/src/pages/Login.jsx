@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import authService from "../services/authService";
 
 export default function Login() {
@@ -26,6 +27,20 @@ export default function Login() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError("");
+
+    try {
+      await authService.googleLogin(credentialResponse.credential);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Unable to sign in with Google."
+      );
     }
   };
 
@@ -85,6 +100,18 @@ export default function Login() {
             {loading ? "Signing in..." : "Sign In →"}
           </button>
         </form>
+
+        <div className="auth-divider">
+          <span>OR</span>
+        </div>
+
+        <div className="google-auth-wrapper">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google sign-in failed. Please try again.")}
+            width="100%"
+          />
+        </div>
 
         <p className="auth-footer">
           Don't have an account?{" "}

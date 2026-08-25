@@ -1,6 +1,9 @@
 import bcrypt from "bcryptjs";
+import { OAuth2Client } from "google-auth-library";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // @route  POST /api/auth/register
 const registerUser = async (req, res, next) => {
@@ -53,7 +56,7 @@ const loginUser = async (req, res, next) => {
 
     const user = await User.findOne({ email }).select("+password");
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
       res.status(401);
       throw new Error("Invalid email or password");
     }
@@ -81,4 +84,55 @@ const getCurrentUser = async (req, res, next) => {
   }
 };
 
-export { registerUser, loginUser, getCurrentUser };
+// @route  POST /api/auth/google
+// @desc   Authenticate a user via a Google ID token, creating the
+//         user if this is their first time signing in with Google
+const googleLogin = async (req, res, next) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      res.status(400);
+      throw new Error("Google credential is required");
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name } = payload;
+
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+
+    if (user) {
+      // account already exists (maybe via normal signup) — link it
+      if (!user.googleId) {
+        user.googleId = googleId;
+        await user.save();
+      }
+    } else {
+      user = await User.create({
+        name,
+        email,
+        googleId,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+      token: generateToken(user._id),
+    });
+  } catch (error) {
+    res.status(401);
+    next(new Error("Google authentication failed"));
+  }
+};
+
+export { registerUser, loginUser, getCurrentUser, googleLogin };

@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
@@ -20,20 +21,9 @@ export default function App() {
 
       <main className="app-main">
         <Routes>
-          <Route
-            path="/"
-            element={<Home />}
-          />
-
-          <Route
-            path="/login"
-            element={<Login />}
-          />
-
-          <Route
-            path="/register"
-            element={<Register />}
-          />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           <Route
             path="/dashboard"
@@ -53,12 +43,11 @@ export default function App() {
             }
           />
 
-          <Route
-            path="*"
-            element={<Home />}
-          />
+          <Route path="*" element={<Home />} />
         </Routes>
       </main>
+
+      <Footer />
     </BrowserRouter>
   );
 }

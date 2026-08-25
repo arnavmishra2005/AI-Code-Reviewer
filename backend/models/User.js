@@ -16,9 +16,16 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
+      required: function () {
+        // not required for users who signed up via Google
+        return !this.googleId;
+      },
       minlength: 6,
       select: false, // never return password by default
+    },
+    googleId: {
+      type: String,
+      default: null,
     },
   },
   { timestamps: true }
